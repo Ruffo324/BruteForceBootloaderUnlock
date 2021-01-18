@@ -1,13 +1,16 @@
-# HuaweiBootloader_Bruteforce
-Fastboot OEM Unlock Bruteforce Software
+# TryNBootLoader
+Crossplatform `fastboot` OEM unlock bruteforce software.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/h1cujp12k7ea91dt?svg=true)](https://ci.appveyor.com/project/rainxh11/huaweibootloader-bruteforce)
-
+Should work in theory on every .Net Core compatible platform.  
+Tested: 
+ - [ ] MacOs
+ - [ ] Windows 10
+ - [ ] Ubuntu
 
 ## Summary
   
-After closing the official HUAWEI website, which allowed you to retrieve the code to unlock the bootloader of Huawei/Honor phones, here is a Winbdows C# Program to retrieve it by yourself.
-It uses a bruteforce method, based on the Luhn algorithm and the iMEI identifier used by the manufacturer to generate the unlocking code
+After closing the official HUAWEI website, which allowed you to retrieve the code to unlock the bootloader of Huawei/Honor phones, here is a C# application to retrieve it by yourself.
+It uses a bruteforce method, based on the Luhn algorithm and the iMEI identifier used by the manufacturer to generate the unlocking code.
 
 ## Instructions
 
@@ -18,4 +21,5 @@ It uses a bruteforce method, based on the Luhn algorithm and the iMEI identifier
 5. You must provide your device IMEI to the program.
 6. Wait it out to finish going through about 200k possible unlock codes, it's going to take a while.
 
-### AUTHOR: Ahmed Chakhoum
+Fork of: 
+[HuaweiBootloader_Bruteforce](https://github.com/rainxh11/HuaweiBootloader_Bruteforce) from [Ahmed Chakhoum](https://github.com/rainxh11)
