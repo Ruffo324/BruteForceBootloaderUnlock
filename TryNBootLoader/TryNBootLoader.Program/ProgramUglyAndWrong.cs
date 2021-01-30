@@ -7,18 +7,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 
 namespace TryNBootLoader.Programm
 {
-    internal class Program
+    internal class ProgramUglyAndWrong
     {
-        
         private static long _imei;
 
         private static List<long> _generatedOemList = new();
-
         
         private static void SaveUntestedCodes()
         {
@@ -28,49 +24,57 @@ namespace TryNBootLoader.Programm
                 {
                     WriteToCodeTextFile(ref _generatedOemList);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignored
+                    Log.Error(ex, "Error happens in ugly saveTestCodes function.");
                 }
 
-                Thread.Sleep(30000);
+                var testDelay = TimeSpan.FromSeconds(5);
+                Log.Information("Thread sleeping '{testDelay}' before repeating..", testDelay);
+                Thread.Sleep(testDelay);
             }
         }
 
         
         private static void WriteToCodeTextFile(ref List<long> generatedOemList)
         {
-            using (TextWriter tw = new StreamWriter(AppContext.BaseDirectory + $"oemcodes_{_imei}.txt"))
-            {
-                foreach (var s in generatedOemList)
-                    tw.WriteLine(s.ToString());
-            }
+            using TextWriter tw = new StreamWriter(AppContext.BaseDirectory + $"oemcodes_{_imei}.txt");
+            foreach (var s in generatedOemList)
+                tw.WriteLine(s.ToString());
         }
 
         
         private static void ExecuteFastBootUnlock(long oemCode, ref bool success, ref List<long> generatedOemList,
             string fastbooDir)
         {
-            if (fastbooDir == null) fastbooDir = AppContext.BaseDirectory + @"fastboot\";
+            // TODO [C.Groothoff]: Write auto downlaoder for every platoform.
             var output = "";
-            var fastBootExe = new Process();
+            var fastBootExe = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "fastboot",
+                    Arguments = $"oem unlock {oemCode}",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
 
-            fastBootExe.StartInfo.FileName = fastbooDir + "fastboot.exe";
-            fastBootExe.StartInfo.Arguments = $"oem unlock {oemCode}";
-            fastBootExe.StartInfo.CreateNoWindow = true;
-            fastBootExe.StartInfo.UseShellExecute = false;
-            fastBootExe.StartInfo.RedirectStandardOutput = true;
-            fastBootExe.StartInfo.RedirectStandardError = true;
 
             try
             {
+                var timeout = TimeSpan.FromSeconds(10);
                 fastBootExe.Start();
                 var readerStdError = fastBootExe.StandardError;
                 var readerStdOutput = fastBootExe.StandardError;
                 output = readerStdError.ReadToEnd() + readerStdOutput.ReadToEnd();
-                fastBootExe.WaitForExit();
+                
+                
+                fastBootExe.WaitForExit((int) timeout.TotalMilliseconds);
             }
-            catch
+            catch (Exception ex)
             {
             }
 
@@ -91,7 +95,7 @@ namespace TryNBootLoader.Programm
                 {
                     generatedOemList.RemoveAt(i);
                 }
-                catch
+                catch (Exception ex)
                 {
                 }
             }
@@ -131,45 +135,30 @@ namespace TryNBootLoader.Programm
         }
 
         
-        private static void ExtractResource(byte[] resFile, string resFileOutDir)
-        {
-            using (var fileStream = new FileStream(resFileOutDir + "fastboot.zip", FileMode.Create))
-            {
-                fileStream.Write(resFile, 0, resFile.Length);
-            }
-
-            try
-            {
-                ZipFile.ExtractToDirectory(resFileOutDir + "fastboot.zip", "fastboot");
-                File.Delete(resFileOutDir + "fastboot.zip");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
+        // private static void ExtractResource(byte[] resFile, string resFileOutDir)
+        // {
+        //     using (var fileStream = new FileStream(resFileOutDir + "fastboot.zip", FileMode.Create))
+        //     {
+        //         fileStream.Write(resFile, 0, resFile.Length);
+        //     }
+        //
+        //     try
+        //     {
+        //         ZipFile.ExtractToDirectory(resFileOutDir + "fastboot.zip", "fastboot");
+        //         File.Delete(resFileOutDir + "fastboot.zip");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine(ex.Message);
+        //     }
+        // }
 
         
         private static void Main(string[] args)
         {
-            byte[] fastbootZipFile = Resources.Fastboot;
             var oemCode = 1000000000000000;
             var currentDir = AppContext.BaseDirectory;
-
-            if (!Directory.Exists(currentDir + @"fastboot\"))
-                try
-                {
-                    Directory.CreateDirectory(currentDir + @"fastboot");
-                }
-                catch
-                {
-                }
-
-            ExtractResource(fastbootZipFile, currentDir + @"fastboot\");
-            var fastbootFolder = currentDir + @"fastboot\";
-
-            if (File.Exists(currentDir + "fastboot.exe")) fastbootFolder = currentDir;
-
+            
             if (args.Length != 0)
             {
                 _imei = long.Parse(args[0]);
@@ -231,7 +220,7 @@ namespace TryNBootLoader.Programm
                     count += 1;
                     Console.Title = $"Processing: {count} / {countMax}";
 
-                    ExecuteFastBootUnlock(currentOem, ref success, ref _generatedOemList, fastbootFolder);
+                    //ExecuteFastBootUnlock(currentOem, ref success, ref _generatedOemList, fastbootFolder);
                 }
                 else
                 {
@@ -253,20 +242,9 @@ namespace TryNBootLoader.Programm
     }
 }
 
-}
-
 
 namespace TryNBootLoader.Programm.Constants
 {
-    internal class BuildConstants
-    {
-        public static readonly LoggingLevelSwitch LoggingLevelSwitch =
-#if DEBUG
-            new(LogEventLevel.Verbose);
-#else
-			new LoggingLevelSwitch(LogEventLevel.Information);
-#endif
-    }
 }
 
 namespace TryNBootLoader.Programm.Extensions
