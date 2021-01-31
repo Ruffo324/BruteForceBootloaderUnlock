@@ -24,7 +24,7 @@ namespace TryNBootLoader.Program.Services
 			=> (await EvaluateWrapperFunction(MethodBase.GetCurrentMethod()))
 				.Select(line => line.Split(" ", StringSplitOptions.RemoveEmptyEntries))
 				.Where(line => line.Length >= 3)
-				.SkipWhile(line => ResolveStateFromText(line[1]) == ADBDevicesDeviceState.Unknown)
+				.SkipWhile(line => ResolveStateFromText(line[1], false) == ADBDevicesDeviceState.Unknown)
 				.Select(line => new ADBDevicesEntry(line[0], ResolveStateFromText(line[1]), string.Join(' ', line[2..])))
 				.ToImmutableArray();
 
