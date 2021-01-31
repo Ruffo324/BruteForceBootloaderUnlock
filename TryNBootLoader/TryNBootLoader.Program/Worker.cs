@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Serilog;
+using TryNBootLoader.Program.Exceptions;
 using TryNBootLoader.Program.Extensions;
 using TryNBootLoader.Program.Services;
 
@@ -53,7 +53,7 @@ namespace TryNBootLoader.Program
 					"Please ensure, that '{Process}' is installed to the system, and added correctly to the environment paths!",
 					processName);
 
-				throw new InvalidOperationException($"Unable to start process {processName}!");
+				throw new ProcessNotStartableException(processName);
 			}
 
 			Log.Information("'{Process}' is correctly installed on the system. ✅", processName);

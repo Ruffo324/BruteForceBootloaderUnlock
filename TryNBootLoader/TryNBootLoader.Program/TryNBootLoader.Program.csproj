@@ -11,4 +11,9 @@
       <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="ProgramUglyAndWrong.cs" />
+      <None Include="ProgramUglyAndWrong.cs" />
+    </ItemGroup>
+
 </Project>

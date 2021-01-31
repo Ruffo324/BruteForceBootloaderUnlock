@@ -8,10 +8,10 @@ namespace TryNBootLoader.Program.Services
 {
 	internal class ProcessService // TODO [C.Groothoff]: Create interface after done!
 	{
-		private static readonly TimeSpan ProcessCancellationTimeoutDuration = TimeSpan.FromSeconds(1);
+		private static readonly TimeSpan _processCancellationTimeoutDuration = TimeSpan.FromSeconds(1);
 
 		private static CancellationToken CreateTimeoutToken()
-			=> new CancellationTokenSource(ProcessCancellationTimeoutDuration).Token;
+			=> new CancellationTokenSource(_processCancellationTimeoutDuration).Token;
 
 		/// <summary>
 		/// Checks if the given process can be started.
@@ -22,22 +22,26 @@ namespace TryNBootLoader.Program.Services
 		public async Task<bool> IsProcessStartAble(string processName)
 		{
 			if (processName.Contains(" "))
+			{
 				throw new ArgumentException(
 					$"Spaces means arguments, found some in '{processName}'! We just want the process name!");
+			}
 
 			try
 			{
-				var process = ProcessX.StartAsync(processName);
-				await process.ToTask(CreateTimeoutToken()).ConfigureAwait(false);
+				var timeoutToken = CreateTimeoutToken();
+				var processCall = $"{processName} --version"; // TODO [C.Groothoff]: Reusabler way of the "--version" implementation.   
+				_ = await ProcessX.StartAsync(processCall).ToTask(timeoutToken);
+
 				return true;
 			}
 			catch (OperationCanceledException)
 			{
-				Log.Warning("Starting process {ProcessName} was canceled by timeout!", processName);
+				Log.Warning("Starting process '{ProcessName}' was canceled by timeout!", processName);
 			}
 			catch (Exception ex)
 			{
-				Log.Warning("Starting {ProcessName} failed. Reason: {ExceptionReason}!", processName, ex.Message);
+				Log.Warning("Starting '{ProcessName}' failed. Reason: '{ExceptionReason}!'", processName, ex.Message.Replace(Environment.NewLine, string.Empty));
 			}
 
 			return false;
