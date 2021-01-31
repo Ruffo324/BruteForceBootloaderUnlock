@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using TryNBootLoader.Program.Constants;
@@ -55,12 +57,17 @@ namespace TryNBootLoader.Program
 		}
 
 		private static void InitializeLogger()
-			=> Log.Logger = new LoggerConfiguration()
+		{
+			// Needed to use emojis in the console under windows. 👨‍💻
+			Console.OutputEncoding = Encoding.Unicode; // TODO [C.Groothoff]: Make PullRequest @ Serilog.Sinks.Console?
+
+			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.ControlledBy(BuildConstants.LoggingLevelSwitch)
 				.WriteTo.Console(
 					outputTemplate:
 					"{Timestamp:yyyy-MM-dd HH:mm:ss.fff} | [{Level:u4}] | {Message:lj}{NewLine}{Exception}",
 					theme: AnsiConsoleTheme.Code)
 				.CreateLogger();
+		}
 	}
 }
