@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 
+#pragma warning disable all
 namespace TryNBootLoader.Programm
 {
 	internal class ProgramUglyAndWrong
