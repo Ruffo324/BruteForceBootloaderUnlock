@@ -12,3 +12,7 @@ namespace TryNBootLoader.Program.Exceptions
 		}
 	}
 }
+
+namespace Ruffo324.Toolbox.Exceptions
+{
+}
