@@ -92,10 +92,31 @@ namespace Ruffo324.Toolbox.Console
 		/// <returns>The selected entry from the passed <paramref name="dataSet"/>.</returns>
 		public static Task<T> SelectItemOrAbort<T>(ImmutableArray<T> dataSet, Func<T, string[]> toCellStringsConverter, string[] headerCells, ConsoleKey exitKey = ConsoleKey.E)
 			=> Task.Run(() => {
-				// TODO [C.Groothoff]: TODO: Table format!
-				var cellDataString = dataSet.Select(toCellStringsConverter);
+				var tableColumnCount = headerCells.Length;
+				var cellDataStrings = dataSet.Select(toCellStringsConverter).ToImmutableArray();
 
-				// if (headerCells.Length !=)
+				if (cellDataStrings.First().Length != tableColumnCount)
+				{
+					throw new ArgumentOutOfRangeException($"The length of {nameof(headerCells)} is not equal to the length of the '{nameof(toCellStringsConverter)}' result!");
+				}
+
+				cellDataStrings = cellDataStrings.Prepend(headerCells).ToImmutableArray();
+
+				// Calculate max needed column width's.
+				var columnWidths = Enumerable.Range(0, tableColumnCount)
+					.Select(i => cellDataStrings.Select(d => d[i].Length).Max())
+					.ToImmutableArray();
+
+				// "Draw(write)" the table now!
+				var rowDataTemplate = "{0} => " + string.Join('|', Enumerable.Range(0, tableColumnCount).Select(i => $" {i + 1} "));
+				for (var i = 0; i < cellDataStrings.Length; i++)
+				{
+					var rowData = cellDataStrings[i];
+
+					// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+					Log.Information(rowDataTemplate, cellDataStrings[i].Prepend(i.ToString()));
+				}
+
 				Log.Information("Enter the number of the wanted row, or press '{ExitKey}' to abort the whole process..", exitKey);
 				Log.Information("Submit with {Enter}..", ConsoleKey.Enter);
 
