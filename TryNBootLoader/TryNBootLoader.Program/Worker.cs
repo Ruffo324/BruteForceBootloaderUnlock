@@ -38,9 +38,9 @@ namespace TryNBootLoader.Program
 			Log.Logger.PrintLine();
 			Log.Information("Welcome to \"{ProgramName}\", we get ur bootloader unlocked!", nameof(TryNBootLoader));
 
-			// Try resolving the IMEI automatic.
-			// TODO [C.Groothoff]: 
-			Log.Information("");
+			// Now detect phone and try resolving the IMEI automatic.
+			
+
 		}
 
 

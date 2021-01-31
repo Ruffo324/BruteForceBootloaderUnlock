@@ -16,4 +16,8 @@
       <None Include="ProgramUglyAndWrong.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Ruffo324.Toolbox\Ruffo324.Toolbox.csproj" />
+    </ItemGroup>
+
 </Project>
